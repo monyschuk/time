@@ -133,3 +133,32 @@ extension TimePeriod: CustomStringConvertible {
     }
     
 }
+
+public extension CodingUserInfoKey {
+    
+    /// Coding key used to provide an alternative to the system clock while decoding `TimePeriod` values.
+    static var clockCodingKey: CodingUserInfoKey {
+        // swiftlint:disable:next force_unwrapping
+        return CodingUserInfoKey(rawValue: "clockCodingKey")!
+    }
+}
+
+extension TimePeriod: Codable {
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+
+        if let clock = decoder.userInfo[.clockCodingKey] as? Clock {
+            self.region = clock.region
+        } else {
+            self.region = Clocks.system.region
+        }
+
+        self.dateComponents = try container.decode(DateComponents.self)
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        
+        try container.encode(dateComponents)
+    }
+}
