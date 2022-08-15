@@ -16,7 +16,7 @@ import Foundation
 
 
 /// An `Instant` is an instantaneous point in time, relative to an `Epoch`.
-public struct Instant: Hashable, Comparable {
+public struct Instant: Hashable, Comparable, Codable {
 
     /// Determine if two Instants are equivalent.
     public static func ==(lhs: Instant, rhs: Instant) -> Bool {
@@ -74,5 +74,15 @@ public struct Instant: Hashable, Comparable {
         let epochOffset = epoch.offsetFromReferenceDate - self.epoch.offsetFromReferenceDate
         let epochInterval = intervalSinceEpoch - epochOffset
         return Instant(interval: epochInterval, since: epoch)
+    }
+    
+    // MARK: - Codable
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        self.init(date: try container.decode(Date.self))
+    }
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(date)
     }
 }
